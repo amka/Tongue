@@ -1,21 +1,22 @@
 package me.meamka.tongue;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.LogWriter;
-import android.support.v4.widget.TextViewCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.Console;
+import com.studioidan.httpagent.JsonCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 /**
@@ -27,6 +28,8 @@ import java.io.Console;
  * create an instance of this fragment.
  */
 public class TranslateFragment extends Fragment {
+
+    private Translator translator;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -36,7 +39,7 @@ public class TranslateFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private EditText originText;
+    private EditText originTextView;
     private TextView transText;
 
     private OnFragmentInteractionListener mListener;
@@ -70,6 +73,8 @@ public class TranslateFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        translator = new Translator();
     }
 
     @Override
@@ -81,8 +86,8 @@ public class TranslateFragment extends Fragment {
 
         transText = (TextView)view.findViewById(R.id.transText);
 
-        originText = (EditText)view.findViewById(R.id.originText);
-        originText.addTextChangedListener(new TextWatcher() {
+        originTextView = (EditText)view.findViewById(R.id.originText);
+        originTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // Auto generated. Not used yet.
@@ -90,7 +95,35 @@ public class TranslateFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                transText.setText(originText.getText());
+                // Delay translation call to get time for user's input
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        // Check if there is string to translate
+                        String originText = originTextView.getText().toString();
+                        if (originText.length() <= 0) {
+                            transText.setText("");
+                            return;
+                        }
+
+                        // Call API method with callback
+                        translator.getTranslation(originText, "ru", new JsonCallback() {
+                            @Override
+                            protected void onDone(boolean success, JSONObject jsonResults) {
+                                Log.d("API", "Success -> " + jsonResults.toString());
+                                if (success) {
+                                    try {
+                                        transText.setText(jsonResults.getJSONArray("text").getString(0));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }, 500);
             }
 
             @Override
@@ -99,14 +132,15 @@ public class TranslateFragment extends Fragment {
             }
         });
 
+        originTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    Log.d("TONGUE", String.format("Add \"%s\" to History storage", originTextView.getText()));
+                }
+            }
+        });
         return view;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
 //    @Override
