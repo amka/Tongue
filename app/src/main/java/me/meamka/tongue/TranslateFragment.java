@@ -3,10 +3,19 @@ package me.meamka.tongue;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.LogWriter;
+import android.support.v4.widget.TextViewCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import java.io.Console;
 
 
 /**
@@ -26,6 +35,9 @@ public class TranslateFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private EditText originText;
+    private TextView transText;
 
     private OnFragmentInteractionListener mListener;
 
@@ -63,8 +75,31 @@ public class TranslateFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_translate, container, false);
+        View view = inflater.inflate(R.layout.fragment_translate, container, false);
+
+        transText = (TextView)view.findViewById(R.id.transText);
+
+        originText = (EditText)view.findViewById(R.id.originText);
+        originText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Auto generated. Not used yet.
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                transText.setText(originText.getText());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Auto generated. Not used yet.
+            }
+        });
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
