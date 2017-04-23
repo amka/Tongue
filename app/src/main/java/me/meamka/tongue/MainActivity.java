@@ -3,43 +3,82 @@ package me.meamka.tongue;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mTextMessage;
+    private FragmentManager fragmentManager;
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+    private Fragment translateFragment;
+    private Fragment bookmarkFragment;
+    private Fragment historyFragment;
 
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
-                    return true;
-                case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_bookmarks);
-                    return true;
-                case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_history);
-                    return true;
-            }
-            return false;
-        }
-
-    };
+//    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+//            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+//
+//        @Override
+//        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//
+//
+//            switch (item.getItemId()) {
+//                case R.id.navigation_home:
+//                    fragmentTransaction.replace(R.id.container, translateFragment).commit();
+//                    return true;
+//                case R.id.navigation_dashboard:
+//                    fragmentTransaction.replace(R.id.container, bookmarkFragment).commit();
+//                    return true;
+//                case R.id.navigation_notifications:
+//                    fragmentTransaction.replace(R.id.container, historyFragment).commit();
+//                    return true;
+//            }
+//            return false;
+//        }
+//
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // Find fragments
+        fragmentManager = getSupportFragmentManager();
+
+        translateFragment = new TranslateFragment();
+        bookmarkFragment = new BookmarkFragment();
+        historyFragment = new HistoryFragment();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        // Set default fragment
+        fragmentManager.beginTransaction().add(R.id.container, translateFragment).commit();
+
+        navigation.setOnNavigationItemSelectedListener(
+                new BottomNavigationView.OnNavigationItemSelectedListener(){
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                        switch (item.getItemId()) {
+                            case R.id.navigation_home:
+                                fragmentTransaction.replace(R.id.container, translateFragment).commit();
+                                return true;
+                            case R.id.navigation_dashboard:
+                                fragmentTransaction.replace(R.id.container, bookmarkFragment).commit();
+                                return true;
+                            case R.id.navigation_notifications:
+                                fragmentTransaction.replace(R.id.container, historyFragment).commit();
+                                return true;
+                        }
+                        return false;
+                    }
+                });
     }
 
 }
