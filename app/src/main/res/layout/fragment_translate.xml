@@ -47,9 +47,10 @@
         android:layout_width="match_parent"
         android:layout_height="128dp"
         android:layout_below="@+id/toolbar"
+        android:layout_margin="@dimen/activity_vertical_margin"
         android:ems="10"
         android:gravity="start"
-        android:layout_margin="@dimen/activity_vertical_margin"
+        android:hint="@string/origin_text_hint"
         android:inputType="textMultiLine" />
 
     <TextView
@@ -58,7 +59,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_below="@+id/originText"
-        android:layout_margin="@dimen/activity_vertical_margin" />
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:textSize="18sp" />
 
     <ImageButton
         android:id="@+id/faveBtn"
