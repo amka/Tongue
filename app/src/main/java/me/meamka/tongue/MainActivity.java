@@ -1,6 +1,5 @@
 package me.meamka.tongue;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -8,14 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
-
-import com.studioidan.httpagent.JsonCallback;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         Boolean result = false;
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
 
                         switch (item.getItemId()) {
                             case R.id.navigation_home:

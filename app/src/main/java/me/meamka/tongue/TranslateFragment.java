@@ -18,18 +18,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
-import android.widget.Spinner;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.studioidan.httpagent.JsonCallback;
-import com.studioidan.httpagent.StringCallback;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,6 +35,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import me.meamka.tongue.Storage.BookmarkDBHelper;
+import me.meamka.tongue.Storage.BookmarkEntry;
+import me.meamka.tongue.Storage.HistoryDBHelper;
+import me.meamka.tongue.Storage.HistoryEntry;
 
 
 /**
@@ -55,19 +58,15 @@ public class TranslateFragment extends Fragment {
     private Button originLangBtn;
     private Button targetLangBtn;
     private ImageButton swapLangBtn;
+    private ImageButton faveBtn;
     private String originLanguage;
     private String targetLanguage;
 
+    HistoryDBHelper historyDBHelper;
+    BookmarkDBHelper bookmarkDBHelper;
+
     Map<String, String> langMap;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public TranslateFragment() {
         // Required empty public constructor
@@ -84,22 +83,16 @@ public class TranslateFragment extends Fragment {
     // TODO: Rename and change types and number of parameters
     public static TranslateFragment newInstance(String param1, String param2) {
         TranslateFragment fragment = new TranslateFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         translator = new Translator();
+        historyDBHelper = new HistoryDBHelper(getContext());
+        bookmarkDBHelper = new BookmarkDBHelper(getContext());
     }
 
     @Override
@@ -113,6 +106,24 @@ public class TranslateFragment extends Fragment {
         originLangBtn = (Button) view.findViewById(R.id.originLangBtn);
         targetLangBtn = (Button) view.findViewById(R.id.targetLangBtn);
         swapLangBtn = (ImageButton) view.findViewById(R.id.swapLangBtn);
+        faveBtn = (ImageButton) view.findViewById(R.id.faveBtn);
+
+        faveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (originTextView.getText().length() > 0) {
+                    Log.d("TONGUE", String.format("Add \"%s\" to Bookmarks storage", originTextView.getText().toString()));
+                    bookmarkDBHelper.addEntry(new BookmarkEntry(
+                            originTextView.getText().toString(),
+                            transText.getText().toString(),
+                            langMap.get(originLanguage),
+                            langMap.get(targetLanguage)
+                    ));
+
+                    Toast.makeText(getContext(), "Added to Bookmarks", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         // connect buttons with handlers
         originLangBtn.setOnClickListener(new View.OnClickListener() {
@@ -163,12 +174,11 @@ public class TranslateFragment extends Fragment {
 
                             } catch (JSONException e) {
 
-                                Toast toast = Toast.makeText(
-                                        getActivity().getApplicationContext(),
+                                Toast.makeText(
+                                        getContext(),
                                         "Looks like Internet is not available yet!",
                                         Toast.LENGTH_SHORT
-                                );
-                                toast.show();
+                                ).show();
                                 e.printStackTrace();
                             }
                         }
@@ -188,6 +198,11 @@ public class TranslateFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (originTextView.getText().length() > 0) {
+                    faveBtn.setVisibility(View.VISIBLE);
+                } else {
+                    faveBtn.setVisibility(View.INVISIBLE);
+                }
                 // Delay translation call to get time for user's input
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -208,13 +223,24 @@ public class TranslateFragment extends Fragment {
             }
         });
 
-        // Add handler to put translated text into History storage
+        // bo handler to put translated text into History storage
         originTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     Log.d("TONGUE", String.format("Add \"%s\" to History storage",
                             originTextView.getText()));
+
+                    if (originTextView.getText().length() > 0) {
+                        historyDBHelper.addEntry(new HistoryEntry(
+                                originTextView.getText().toString(),
+                                transText.getText().toString(),
+                                langMap.get(originLanguage),
+                                langMap.get(targetLanguage)
+                        ));
+
+                        Toast.makeText(getContext(), R.string.bookmark_added, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });

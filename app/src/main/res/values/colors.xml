@@ -2,7 +2,8 @@
 <resources>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorBlack">#202020</color>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorGray">#5c5c5c</color>
+    <color name="colorPrimary">#3f51b5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 </resources>
