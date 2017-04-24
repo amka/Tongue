@@ -10,8 +10,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -133,6 +131,7 @@ public class TranslateFragment extends Fragment {
         swapLangBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!hasAvailableLangs()) return;
                 String tmp = originLanguage;
                 changeOriginLanguage(targetLanguage, false);
                 changeTargetLanguage(tmp, false);
@@ -227,7 +226,7 @@ public class TranslateFragment extends Fragment {
         originTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
+                if (!hasFocus && hasAvailableLangs()) {
                     Log.d("TONGUE", String.format("Add \"%s\" to History storage",
                             originTextView.getText()));
 
@@ -259,14 +258,7 @@ public class TranslateFragment extends Fragment {
 
     private void selectOriginLanguage() {
 
-        if (langMap == null || langMap.isEmpty()) {
-            Toast.makeText(
-                    getContext(),
-                    "No languages available. Check your Internet connection",
-                    Toast.LENGTH_SHORT
-            ).show();
-            return;
-        }
+        if (!hasAvailableLangs()) return;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.select_language_title);
 
@@ -285,16 +277,27 @@ public class TranslateFragment extends Fragment {
         langDialog.show();
     }
 
-    private void selectTargetLanguage() {
-
+    /**
+     * Check for loaded list of available languages
+     *
+     * @return has available languages or not
+     */
+    private boolean hasAvailableLangs() {
         if (langMap == null || langMap.isEmpty()) {
             Toast.makeText(
                     getContext(),
                     "No languages available. Check your Internet connection",
                     Toast.LENGTH_SHORT
             ).show();
-            return;
+            return false;
         }
+        return true;
+    }
+
+    private void selectTargetLanguage() {
+
+        if (!hasAvailableLangs()) return;
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.select_language_title);
 
@@ -326,6 +329,8 @@ public class TranslateFragment extends Fragment {
             transText.setText("");
             return;
         }
+
+        if (!hasAvailableLangs()) return;
 
         String direction = String.format("%s-%s",
                 langMap.get(originLanguage),

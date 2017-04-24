@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +36,14 @@ public class MainActivity extends AppCompatActivity {
 
         // Set default fragment
         fragmentManager.beginTransaction().add(R.id.container, translateFragment).commit();
+
+        if (Utils.isNetworkAvailable(getApplicationContext())) {
+            Toast.makeText(
+                    getApplicationContext(),
+                    "You should check Internet connection.",
+                    Toast.LENGTH_LONG
+            ).show();
+        }
 
         navigation.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
