@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -117,49 +118,24 @@ public class TranslateFragment extends Fragment {
         originLangBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TONGUE", "Origin Clicked");
+                selectOriginLanguage();
             }
         });
 
         swapLangBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TONGUE", "Swapped!");
+                String tmp = originLanguage;
+                changeOriginLanguage(targetLanguage, false);
+                changeTargetLanguage(tmp, false);
+                translateText(originTextView.getText().toString(), originLanguage, targetLanguage);
             }
         });
 
         targetLangBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (langMap == null || langMap.isEmpty()) {
-                    Toast.makeText(
-                            getContext(),
-                            "No languages available. Check your Internet connection",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    return;
-                }
-                List<String> keys = new ArrayList<String>(langMap.keySet());
-                final ArrayAdapter<String> langsAdapter = new ArrayAdapter<String>(
-                        getActivity().getApplicationContext(),
-                        R.layout.language_list_item,
-                        R.id.langText,
-                        keys);
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle(R.string.select_language_title);
-
-                builder.setAdapter(langsAdapter, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        targetLanguage = langsAdapter.getItem(which);
-                        Log.d("TONGUE", "Selected lang code -> " + langMap.get(targetLanguage));
-                    }
-                });
-
-                AlertDialog langDialog = builder.create();
-                langDialog.show();
+                selectTargetLanguage();
             }
         });
 
@@ -176,10 +152,15 @@ public class TranslateFragment extends Fragment {
                                     String key = (String) iter.next();
                                     String value = jsonResults.getJSONObject("langs").getString(key);
                                     langMap.put(value, key);
+
+                                    // Set defaults languages.
+                                    // @TODO: load last used combination from prefs
+                                    if (key.equals("en"))
+                                        changeOriginLanguage(value, false);
+                                    if (key.equals("ru"))
+                                        changeTargetLanguage(value, false);
                                 }
 
-                                Bundle bundle = new Bundle();
-                                bundle.putSerializable("langs", (Serializable) langMap);
                             } catch (JSONException e) {
 
                                 Toast toast = Toast.makeText(
@@ -212,28 +193,11 @@ public class TranslateFragment extends Fragment {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-
-                        // Check if there is string to translate
-                        String originText = originTextView.getText().toString();
-                        if (originText.length() <= 0) {
-                            transText.setText("");
-                            return;
-                        }
-
-                        // Call API method with callback
-                        translator.getTranslation(originText, langMap.get(targetLanguage), new JsonCallback() {
-                            @Override
-                            protected void onDone(boolean success, JSONObject jsonResults) {
-                                Log.d("API", "Success -> " + jsonResults.toString());
-                                if (success) {
-                                    try {
-                                        transText.setText(jsonResults.getJSONArray("text").getString(0));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
+                        translateText(
+                                originTextView.getText().toString(),
+                                originLanguage,
+                                targetLanguage
+                        );
                     }
                 }, 500);
             }
@@ -249,11 +213,77 @@ public class TranslateFragment extends Fragment {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    Log.d("TONGUE", String.format("Add \"%s\" to History storage", originTextView.getText()));
+                    Log.d("TONGUE", String.format("Add \"%s\" to History storage",
+                            originTextView.getText()));
                 }
             }
         });
         return view;
+    }
+
+    private ArrayAdapter<String> getLanguagesAdapter() {
+        List<String> keys = new ArrayList<String>(langMap.keySet());
+        Collections.sort(keys);
+        return new ArrayAdapter<String>(
+                getActivity().getApplicationContext(),
+                R.layout.language_list_item,
+                R.id.langText,
+                keys
+        );
+    }
+
+    private void selectOriginLanguage() {
+
+        if (langMap == null || langMap.isEmpty()) {
+            Toast.makeText(
+                    getContext(),
+                    "No languages available. Check your Internet connection",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.select_language_title);
+
+        final ArrayAdapter<String> langsAdapter = getLanguagesAdapter();
+
+        builder.setAdapter(langsAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                changeOriginLanguage(langsAdapter.getItem(which), true);
+                Log.d("TONGUE", "Selected lang code -> " + langMap.get(targetLanguage));
+            }
+        });
+
+        AlertDialog langDialog = builder.create();
+        langDialog.show();
+    }
+
+    private void selectTargetLanguage() {
+
+        if (langMap == null || langMap.isEmpty()) {
+            Toast.makeText(
+                    getContext(),
+                    "No languages available. Check your Internet connection",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.select_language_title);
+
+        final ArrayAdapter<String> langsAdapter = getLanguagesAdapter();
+
+        builder.setAdapter(langsAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                changeTargetLanguage(langsAdapter.getItem(which), true);
+                Log.d("TONGUE", "Selected lang code -> " + langMap.get(targetLanguage));
+            }
+        });
+
+        AlertDialog langDialog = builder.create();
+        langDialog.show();
     }
 
     @Override
@@ -265,5 +295,61 @@ public class TranslateFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
+    }
+
+    /**
+     * Translate given text from origin language to target
+     */
+    private void translateText(String text, String originLanguage, String targetLanguage) {
+        // Check if there is string to translate
+        if (text.length() <= 0) {
+            transText.setText("");
+            return;
+        }
+
+        String direction = String.format("%s-%s",
+                langMap.get(originLanguage),
+                langMap.get(targetLanguage)
+        );
+
+        // Call API method with callback
+        translator.getTranslation(text, direction, new JsonCallback() {
+            @Override
+            protected void onDone(boolean success, JSONObject jsonResults) {
+                Log.d("API", "Success -> " + jsonResults.toString());
+                if (success) {
+                    try {
+                        transText.setText(jsonResults.getJSONArray("text").getString(0));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Change origin language and call translate method
+     *
+     * @param language - origin language name
+     */
+    private void changeOriginLanguage(String language, Boolean translateAfter) {
+
+        originLanguage = language;
+        originLangBtn.setText(originLanguage);
+        if (translateAfter)
+            translateText(originTextView.getText().toString(), originLanguage, targetLanguage);
+    }
+
+    /**
+     * Change target language and call translate method
+     *
+     * @param language - target language name
+     */
+    private void changeTargetLanguage(String language, Boolean translateAfter) {
+        targetLanguage = language;
+        targetLangBtn.setText(targetLanguage);
+        if (translateAfter)
+            translateText(originTextView.getText().toString(), originLanguage, targetLanguage);
     }
 }
