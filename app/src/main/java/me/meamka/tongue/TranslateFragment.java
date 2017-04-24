@@ -109,7 +109,7 @@ public class TranslateFragment extends Fragment {
                 if (originTextView.getText().length() > 0) {
                     Log.d("TONGUE", String.format("Add \"%s\" to Bookmarks storage", originTextView.getText().toString()));
                     bookmarkDBHelper.addEntry(new BookmarkEntry(
-                            originTextView.getText().toString(),
+                            originTextView.getText().toString().trim(),
                             transText.getText().toString(),
                             langMap.get(originLanguage),
                             langMap.get(targetLanguage)
@@ -232,7 +232,7 @@ public class TranslateFragment extends Fragment {
 
                     if (originTextView.getText().length() > 0) {
                         historyDBHelper.addEntry(new HistoryEntry(
-                                originTextView.getText().toString(),
+                                originTextView.getText().toString().trim(),
                                 transText.getText().toString(),
                                 langMap.get(originLanguage),
                                 langMap.get(targetLanguage)
