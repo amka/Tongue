@@ -1,10 +1,11 @@
 package me.meamka.tongue;
 
-import android.net.Uri;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -13,19 +14,33 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.studioidan.httpagent.JsonCallback;
+import com.studioidan.httpagent.StringCallback;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link TranslateFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link TranslateFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -33,6 +48,17 @@ import org.json.JSONObject;
 public class TranslateFragment extends Fragment {
 
     private Translator translator;
+
+    private EditText originTextView;
+    private TextView transText;
+    private Button originLangBtn;
+    private Button targetLangBtn;
+    private ImageButton swapLangBtn;
+    private String originLanguage;
+    private String targetLanguage;
+
+    Map<String, String> langMap;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -41,11 +67,6 @@ public class TranslateFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
-    private EditText originTextView;
-    private TextView transText;
-
-    private OnFragmentInteractionListener mListener;
 
     public TranslateFragment() {
         // Required empty public constructor
@@ -85,11 +106,99 @@ public class TranslateFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_translate, container, false);
+        final View view = inflater.inflate(R.layout.fragment_translate, container, false);
 
-        transText = (TextView)view.findViewById(R.id.transText);
+        // Find UI buttons
+        originLangBtn = (Button) view.findViewById(R.id.originLangBtn);
+        targetLangBtn = (Button) view.findViewById(R.id.targetLangBtn);
+        swapLangBtn = (ImageButton) view.findViewById(R.id.swapLangBtn);
 
-        originTextView = (EditText)view.findViewById(R.id.originText);
+        // connect buttons with handlers
+        originLangBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("TONGUE", "Origin Clicked");
+            }
+        });
+
+        swapLangBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("TONGUE", "Swapped!");
+            }
+        });
+
+        targetLangBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (langMap == null || langMap.isEmpty()) {
+                    Toast.makeText(
+                            getContext(),
+                            "No languages available. Check your Internet connection",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
+                List<String> keys = new ArrayList<String>(langMap.keySet());
+                final ArrayAdapter<String> langsAdapter = new ArrayAdapter<String>(
+                        getActivity().getApplicationContext(),
+                        R.layout.language_list_item,
+                        R.id.langText,
+                        keys);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle(R.string.select_language_title);
+
+                builder.setAdapter(langsAdapter, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        targetLanguage = langsAdapter.getItem(which);
+                        Log.d("TONGUE", "Selected lang code -> " + langMap.get(targetLanguage));
+                    }
+                });
+
+                AlertDialog langDialog = builder.create();
+                langDialog.show();
+            }
+        });
+
+        // Load available languages
+        new Translator().getLangs(
+                Resources.getSystem().getConfiguration().locale.getLanguage(),
+                new JsonCallback() {
+                    @Override
+                    protected void onDone(boolean success, JSONObject jsonResults) {
+                        if (success) {
+                            langMap = new HashMap<String, String>();
+                            try {
+                                for (Iterator<String> iter = jsonResults.getJSONObject("langs").keys(); iter.hasNext(); ) {
+                                    String key = (String) iter.next();
+                                    String value = jsonResults.getJSONObject("langs").getString(key);
+                                    langMap.put(value, key);
+                                }
+
+                                Bundle bundle = new Bundle();
+                                bundle.putSerializable("langs", (Serializable) langMap);
+                            } catch (JSONException e) {
+
+                                Toast toast = Toast.makeText(
+                                        getActivity().getApplicationContext(),
+                                        "Looks like Internet is not available yet!",
+                                        Toast.LENGTH_SHORT
+                                );
+                                toast.show();
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+        );
+
+        transText = (TextView) view.findViewById(R.id.transText);
+
+        // Connect change event handler with text edit view
+        originTextView = (EditText) view.findViewById(R.id.originText);
         originTextView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -112,7 +221,7 @@ public class TranslateFragment extends Fragment {
                         }
 
                         // Call API method with callback
-                        translator.getTranslation(originText, "ru", new JsonCallback() {
+                        translator.getTranslation(originText, langMap.get(targetLanguage), new JsonCallback() {
                             @Override
                             protected void onDone(boolean success, JSONObject jsonResults) {
                                 Log.d("API", "Success -> " + jsonResults.toString());
@@ -135,6 +244,7 @@ public class TranslateFragment extends Fragment {
             }
         });
 
+        // Add handler to put translated text into History storage
         originTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -146,36 +256,9 @@ public class TranslateFragment extends Fragment {
         return view;
     }
 
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
-
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 
     @Override
