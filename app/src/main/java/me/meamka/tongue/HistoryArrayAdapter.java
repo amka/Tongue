@@ -53,6 +53,9 @@ public class HistoryArrayAdapter extends ArrayAdapter<HistoryEntry> {
         if (item != null) {
             ((TextView) view.findViewById(R.id.historyOriginLabel)).setText(item.getOrigin());
             ((TextView) view.findViewById(R.id.historyTranslatedLabel)).setText(item.getTranslated());
+            ((TextView) view.findViewById(R.id.historyOriginLang)).setText(item.getOriginLang());
+            ((TextView) view.findViewById(R.id.historyTargetLang)).setText(item.getTargetLang());
+
             Log.d("TONGUE", String.format("Adapter: %d -> %s", position, item.getOrigin()));
         }
         return view;

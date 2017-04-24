@@ -49,8 +49,10 @@ public class BookmarkArrayAdapter extends ArrayAdapter<BookmarkEntry> {
         }
         BookmarkEntry item = list.get(position);
         if (item != null) {
-            ((TextView) view.findViewById(R.id.bookmarksOriginLabel)).setText(item.getOrigin());
-            ((TextView) view.findViewById(R.id.bookmarksTranslatedLabel)).setText(item.getTranslated());
+            ((TextView) view.findViewById(R.id.bookmarkOriginLabel)).setText(item.getOrigin());
+            ((TextView) view.findViewById(R.id.bookmarkTranslatedLabel)).setText(item.getTranslated());
+            ((TextView) view.findViewById(R.id.bookmarkOriginLang)).setText(item.getOriginLang());
+            ((TextView) view.findViewById(R.id.bookmarkTargetLang)).setText(item.getTargetLang());
             Log.d("TONGUE", String.format("Adapter: %d -> %s", position, item.getOrigin()));
         }
         return view;
