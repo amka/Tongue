@@ -18,19 +18,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.studioidan.httpagent.JsonCallback;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -150,41 +147,44 @@ public class TranslateFragment extends Fragment {
             }
         });
 
-        // Load available languages
-        new Translator().getLangs(
-                Resources.getSystem().getConfiguration().locale.getLanguage(),
-                new JsonCallback() {
-                    @Override
-                    protected void onDone(boolean success, JSONObject jsonResults) {
-                        if (success) {
-                            langMap = new HashMap<String, String>();
-                            try {
-                                for (Iterator<String> iter = jsonResults.getJSONObject("langs").keys(); iter.hasNext(); ) {
-                                    String key = (String) iter.next();
-                                    String value = jsonResults.getJSONObject("langs").getString(key);
-                                    langMap.put(value, key);
 
-                                    // Set defaults languages.
-                                    // @TODO: load last used combination from prefs
-                                    if (key.equals("en"))
-                                        changeOriginLanguage(value, false);
-                                    if (key.equals("ru"))
-                                        changeTargetLanguage(value, false);
+        if (Utils.isNetworkAvailable(getContext())) {
+            // Load available languages
+            translator.getLangs(
+                    Resources.getSystem().getConfiguration().locale.getLanguage(),
+                    new JsonCallback() {
+                        @Override
+                        protected void onDone(boolean success, JSONObject jsonResults) {
+                            if (success) {
+                                langMap = new HashMap<String, String>();
+                                try {
+                                    for (Iterator<String> iter = jsonResults.getJSONObject("langs").keys(); iter.hasNext(); ) {
+                                        String key = (String) iter.next();
+                                        String value = jsonResults.getJSONObject("langs").getString(key);
+                                        langMap.put(value, key);
+
+                                        // Set defaults languages.
+                                        // @TODO: load last used combination from prefs
+                                        if (key.equals("en"))
+                                            changeOriginLanguage(value, false);
+                                        if (key.equals("ru"))
+                                            changeTargetLanguage(value, false);
+                                    }
+
+                                } catch (JSONException e) {
+
+                                    Toast.makeText(
+                                            getContext(),
+                                            "Looks like Internet is not available yet!",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+                                    e.printStackTrace();
                                 }
-
-                            } catch (JSONException e) {
-
-                                Toast.makeText(
-                                        getContext(),
-                                        "Looks like Internet is not available yet!",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                                e.printStackTrace();
                             }
                         }
                     }
-                }
-        );
+            );
+        }
 
         transText = (TextView) view.findViewById(R.id.transText);
 
@@ -338,20 +338,22 @@ public class TranslateFragment extends Fragment {
                 langMap.get(targetLanguage)
         );
 
-        // Call API method with callback
-        translator.getTranslation(text, direction, new JsonCallback() {
-            @Override
-            protected void onDone(boolean success, JSONObject jsonResults) {
-                Log.d("API", "Success -> " + jsonResults.toString());
-                if (success) {
-                    try {
-                        transText.setText(jsonResults.getJSONArray("text").getString(0));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+        if (Utils.isNetworkAvailable(getContext())) {
+            // Call API method with callback
+            translator.getTranslation(text, direction, new JsonCallback() {
+                @Override
+                protected void onDone(boolean success, JSONObject jsonResults) {
+                    Log.d("API", "Success -> " + jsonResults.toString());
+                    if (success) {
+                        try {
+                            transText.setText(jsonResults.getJSONArray("text").getString(0));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
