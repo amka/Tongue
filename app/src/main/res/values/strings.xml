@@ -14,4 +14,7 @@
     <string name="clear_bookmarks_title">Clear Bookmarks</string>
     <string name="bookmark_empty_title">No bookmarks yet.</string>
     <string name="bookmark_added">Added to Bookmarks</string>
+    <string name="target_title">Target</string>
+    <string name="origin_title">Origin</string>
+    <string name="swap_langs_title">Swap Languages</string>
 </resources>
