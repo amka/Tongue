@@ -276,7 +276,6 @@ public class TranslateFragment extends Fragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d("TONGUE", "Which +" + String.valueOf(which));
                         dialog.dismiss();
                         changeOriginLanguage(langsAdapter.getItem(which), true);
                     }
@@ -305,7 +304,6 @@ public class TranslateFragment extends Fragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d("TONGUE", "Which +" + String.valueOf(which));
                         dialog.dismiss();
                         changeTargetLanguage(langsAdapter.getItem(which), true);
                     }
