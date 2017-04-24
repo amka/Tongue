@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         // Set default fragment
         fragmentManager.beginTransaction().add(R.id.container, translateFragment).commit();
 
-        if (Utils.isNetworkAvailable(getApplicationContext())) {
+        if (!Utils.isNetworkAvailable(getApplicationContext())) {
             Toast.makeText(
                     getApplicationContext(),
                     "You should check Internet connection.",
