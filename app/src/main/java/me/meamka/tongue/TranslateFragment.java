@@ -253,7 +253,6 @@ public class TranslateFragment extends Fragment {
         return new ArrayAdapter<String>(
                 getActivity().getApplicationContext(),
                 R.layout.language_list_item,
-                R.id.langText,
                 keys
         );
     }
@@ -273,13 +272,15 @@ public class TranslateFragment extends Fragment {
 
         final ArrayAdapter<String> langsAdapter = getLanguagesAdapter();
 
-        builder.setAdapter(langsAdapter, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                changeOriginLanguage(langsAdapter.getItem(which), true);
-                Log.d("TONGUE", "Selected lang code -> " + langMap.get(targetLanguage));
-            }
-        });
+        builder.setSingleChoiceItems(langsAdapter, langsAdapter.getPosition(originLanguage),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d("TONGUE", "Which +" + String.valueOf(which));
+                        dialog.dismiss();
+                        changeOriginLanguage(langsAdapter.getItem(which), true);
+                    }
+                });
 
         AlertDialog langDialog = builder.create();
         langDialog.show();
@@ -300,14 +301,15 @@ public class TranslateFragment extends Fragment {
 
         final ArrayAdapter<String> langsAdapter = getLanguagesAdapter();
 
-        builder.setAdapter(langsAdapter, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                changeTargetLanguage(langsAdapter.getItem(which), true);
-                Log.d("TONGUE", "Selected lang code -> " + langMap.get(targetLanguage));
-            }
-        });
-
+        builder.setSingleChoiceItems(langsAdapter, langsAdapter.getPosition(targetLanguage),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d("TONGUE", "Which +" + String.valueOf(which));
+                        dialog.dismiss();
+                        changeTargetLanguage(langsAdapter.getItem(which), true);
+                    }
+                });
         AlertDialog langDialog = builder.create();
         langDialog.show();
     }
@@ -315,12 +317,6 @@ public class TranslateFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear();
     }
 
     /**
