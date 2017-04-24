@@ -1,11 +1,9 @@
-package me.meamka.tongue;
+package me.meamka.tongue.Storage;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,27 +13,23 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import me.meamka.tongue.Storage.HistoryEntry;
+import me.meamka.tongue.R;
 
 /**
  * Created by andrey.maksimov on 24.04.17.
  */
 
-public class HistoryArrayAdapter extends ArrayAdapter<HistoryEntry> {
+public class BookmarkArrayAdapter extends ArrayAdapter<BookmarkEntry> {
 
-    private final List<HistoryEntry> list;
+    private final List<BookmarkEntry> list;
     private final Activity context;
     private final int resource;
 
-    public HistoryArrayAdapter(@NonNull Activity context, @LayoutRes int resource, List<HistoryEntry> list) {
+    public BookmarkArrayAdapter(@NonNull Activity context, @LayoutRes int resource, List<BookmarkEntry> list) {
         super(context, resource);
         this.context = context;
         this.resource = resource;
         this.list = list;
-    }
-
-    static class ViewHolder {
-        protected TextView text;
     }
 
     @NonNull
@@ -44,18 +38,17 @@ public class HistoryArrayAdapter extends ArrayAdapter<HistoryEntry> {
         View view;
         LayoutInflater layoutInflater = context.getLayoutInflater();
 
-        if(convertView == null) {
+        if (convertView == null) {
             view = layoutInflater.inflate(resource, null);
         } else {
             view = convertView;
         }
-        HistoryEntry item = list.get(position);
+        BookmarkEntry item = list.get(position);
         if (item != null) {
-            ((TextView) view.findViewById(R.id.historyOriginLabel)).setText(item.getOrigin());
-            ((TextView) view.findViewById(R.id.historyTranslatedLabel)).setText(item.getTranslated());
-            ((TextView) view.findViewById(R.id.historyOriginLang)).setText(item.getOriginLang());
-            ((TextView) view.findViewById(R.id.historyTargetLang)).setText(item.getTargetLang());
-
+            ((TextView) view.findViewById(R.id.bookmarkOriginLabel)).setText(item.getOrigin());
+            ((TextView) view.findViewById(R.id.bookmarkTranslatedLabel)).setText(item.getTranslated());
+            ((TextView) view.findViewById(R.id.bookmarkOriginLang)).setText(item.getOriginLang());
+            ((TextView) view.findViewById(R.id.bookmarkTargetLang)).setText(item.getTargetLang());
             Log.d("TONGUE", String.format("Adapter: %d -> %s", position, item.getOrigin()));
         }
         return view;

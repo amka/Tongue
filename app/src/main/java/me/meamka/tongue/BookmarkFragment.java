@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import me.meamka.tongue.Storage.BookmarkArrayAdapter;
 import me.meamka.tongue.Storage.BookmarkDBHelper;
 import me.meamka.tongue.Storage.BookmarkEntry;
 

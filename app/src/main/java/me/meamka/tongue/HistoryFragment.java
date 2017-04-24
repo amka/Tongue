@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import me.meamka.tongue.Storage.HistoryArrayAdapter;
 import me.meamka.tongue.Storage.HistoryDBHelper;
 import me.meamka.tongue.Storage.HistoryEntry;
 

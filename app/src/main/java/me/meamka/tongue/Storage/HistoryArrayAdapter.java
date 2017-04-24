@@ -1,4 +1,7 @@
-package me.meamka.tongue;
+/**
+ * Created by andrey.maksimov on 24.04.17.
+ */
+package me.meamka.tongue.Storage;
 
 import android.app.Activity;
 import android.support.annotation.LayoutRes;
@@ -13,27 +16,19 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import me.meamka.tongue.Storage.BookmarkEntry;
+import me.meamka.tongue.R;
 
-/**
- * Created by andrey.maksimov on 24.04.17.
- */
+public class HistoryArrayAdapter extends ArrayAdapter<HistoryEntry> {
 
-public class BookmarkArrayAdapter extends ArrayAdapter<BookmarkEntry> {
-
-    private final List<BookmarkEntry> list;
+    private final List<HistoryEntry> list;
     private final Activity context;
     private final int resource;
 
-    public BookmarkArrayAdapter(@NonNull Activity context, @LayoutRes int resource, List<BookmarkEntry> list) {
+    public HistoryArrayAdapter(@NonNull Activity context, @LayoutRes int resource, List<HistoryEntry> list) {
         super(context, resource);
         this.context = context;
         this.resource = resource;
         this.list = list;
-    }
-
-    static class ViewHolder {
-        protected TextView text;
     }
 
     @NonNull
@@ -47,12 +42,13 @@ public class BookmarkArrayAdapter extends ArrayAdapter<BookmarkEntry> {
         } else {
             view = convertView;
         }
-        BookmarkEntry item = list.get(position);
+        HistoryEntry item = list.get(position);
         if (item != null) {
-            ((TextView) view.findViewById(R.id.bookmarkOriginLabel)).setText(item.getOrigin());
-            ((TextView) view.findViewById(R.id.bookmarkTranslatedLabel)).setText(item.getTranslated());
-            ((TextView) view.findViewById(R.id.bookmarkOriginLang)).setText(item.getOriginLang());
-            ((TextView) view.findViewById(R.id.bookmarkTargetLang)).setText(item.getTargetLang());
+            ((TextView) view.findViewById(R.id.historyOriginLabel)).setText(item.getOrigin());
+            ((TextView) view.findViewById(R.id.historyTranslatedLabel)).setText(item.getTranslated());
+            ((TextView) view.findViewById(R.id.historyOriginLang)).setText(item.getOriginLang());
+            ((TextView) view.findViewById(R.id.historyTargetLang)).setText(item.getTargetLang());
+
             Log.d("TONGUE", String.format("Adapter: %d -> %s", position, item.getOrigin()));
         }
         return view;
