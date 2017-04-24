@@ -66,6 +66,18 @@ public class HistoryDBHelper extends SQLiteOpenHelper {
         validateTable();
 
         SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE "
+                        + COLUMN_NAME_ORIGIN + "=? AND "
+                        + COLUMN_NAME_ORIGIN_LANG + "=? AND "
+                        + COLUMN_NAME_TARGET_LANG + "=?",
+                new String[]{entry.getOrigin(), entry.getOriginLang(), entry.getTargetLang()}
+        );
+        if (cursor.getCount() > 0) {
+            cursor.close();
+            return;
+        }
+
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_ORIGIN, entry.getOrigin());
         values.put(COLUMN_NAME_TRANSLATED, entry.getTranslated());
