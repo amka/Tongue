@@ -119,6 +119,8 @@ public class TranslateFragment extends Fragment {
                             langMap.get(originLanguage),
                             langMap.get(targetLanguage)
                     ));
+
+                    Toast.makeText(getContext(), "Added to Bookmarks", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -172,12 +174,11 @@ public class TranslateFragment extends Fragment {
 
                             } catch (JSONException e) {
 
-                                Toast toast = Toast.makeText(
-                                        getActivity().getApplicationContext(),
+                                Toast.makeText(
+                                        getContext(),
                                         "Looks like Internet is not available yet!",
                                         Toast.LENGTH_SHORT
-                                );
-                                toast.show();
+                                ).show();
                                 e.printStackTrace();
                             }
                         }
@@ -261,7 +262,7 @@ public class TranslateFragment extends Fragment {
 
         if (langMap == null || langMap.isEmpty()) {
             Toast.makeText(
-                    getActivity().getApplicationContext(),
+                    getContext(),
                     "No languages available. Check your Internet connection",
                     Toast.LENGTH_SHORT
             ).show();

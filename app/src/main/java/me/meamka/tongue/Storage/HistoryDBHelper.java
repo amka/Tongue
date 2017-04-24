@@ -130,4 +130,15 @@ public class HistoryDBHelper extends SQLiteOpenHelper {
 
         return entriesList;
     }
+
+    /**
+     * Delete all history entries from storage
+     */
+    public void deleteAll() {
+        validateTable();
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME, null, null);
+        db.close();
+    }
 }

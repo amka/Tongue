@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import me.meamka.tongue.Storage.HistoryDBHelper;
 import me.meamka.tongue.Storage.HistoryEntry;
@@ -49,7 +51,7 @@ public class HistoryFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
-        List<HistoryEntry> allEntries = historyDBHelper.getAllEntries(20);
+        final List<HistoryEntry> allEntries = historyDBHelper.getAllEntries(20);
 
         Log.d("TONGUE", allEntries.toString());
         ArrayAdapter<HistoryEntry> entriesAdapter = new HistoryArrayAdapter(
@@ -58,6 +60,21 @@ public class HistoryFragment extends ListFragment {
                 allEntries
         );
         setListAdapter(entriesAdapter);
+
+        // Set handler to clear storage
+        ImageButton clearHistoryButton = (ImageButton) view.findViewById(R.id.deleteAllHistoryBtn);
+        clearHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                historyDBHelper.deleteAll();
+
+                Toast.makeText(
+                        getContext(),
+                        "History cleared.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
         return view;
     }
 

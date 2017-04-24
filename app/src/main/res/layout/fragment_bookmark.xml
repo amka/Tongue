@@ -24,6 +24,7 @@
             android:textColor="@color/colorWhite" />
 
         <ImageButton
+            android:id="@+id/deleteAllBookmarksBtn"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="48dp"
             android:layout_height="wrap_content"

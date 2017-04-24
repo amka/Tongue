@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -49,7 +51,7 @@ public class BookmarkFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bookmark, container, false);
-        List<BookmarkEntry> allEntries = bookmarkDBHelper.getAllEntries(20);
+        final List<BookmarkEntry> allEntries = bookmarkDBHelper.getAllEntries(20);
 
         Log.d("TONGUE", allEntries.toString());
         ArrayAdapter<BookmarkEntry> entriesAdapter = new BookmarkArrayAdapter(
@@ -58,6 +60,21 @@ public class BookmarkFragment extends ListFragment {
                 allEntries
         );
         setListAdapter(entriesAdapter);
+
+        // Set handler to clear storage
+        ImageButton clearHistoryButton = (ImageButton) view.findViewById(R.id.deleteAllBookmarksBtn);
+        clearHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bookmarkDBHelper.deleteAll();
+                allEntries.clear();
+                Toast.makeText(
+                        getContext(),
+                        "Bookmarks cleared",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
         return view;
     }
 
