@@ -1,5 +1,6 @@
 package me.meamka.tongue;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -7,8 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
+
+import com.studioidan.httpagent.JsonCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,29 +24,6 @@ public class MainActivity extends AppCompatActivity {
     private Fragment translateFragment;
     private Fragment bookmarkFragment;
     private Fragment historyFragment;
-
-//    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-//            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-//
-//        @Override
-//        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-//
-//
-//            switch (item.getItemId()) {
-//                case R.id.navigation_home:
-//                    fragmentTransaction.replace(R.id.container, translateFragment).commit();
-//                    return true;
-//                case R.id.navigation_dashboard:
-//                    fragmentTransaction.replace(R.id.container, bookmarkFragment).commit();
-//                    return true;
-//                case R.id.navigation_notifications:
-//                    fragmentTransaction.replace(R.id.container, historyFragment).commit();
-//                    return true;
-//            }
-//            return false;
-//        }
-//
-//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,28 +39,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        invalidateOptionsMenu();
 
         // Set default fragment
         fragmentManager.beginTransaction().add(R.id.container, translateFragment).commit();
 
         navigation.setOnNavigationItemSelectedListener(
-                new BottomNavigationView.OnNavigationItemSelectedListener(){
+                new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        Boolean result = false;
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
                         switch (item.getItemId()) {
                             case R.id.navigation_home:
                                 fragmentTransaction.replace(R.id.container, translateFragment).commit();
-                                return true;
+                                result = true;
+                                break;
                             case R.id.navigation_dashboard:
                                 fragmentTransaction.replace(R.id.container, bookmarkFragment).commit();
-                                return true;
+                                result = true;
+                                break;
                             case R.id.navigation_notifications:
                                 fragmentTransaction.replace(R.id.container, historyFragment).commit();
-                                return true;
+                                result = true;
+                                break;
                         }
-                        return false;
+
+                        invalidateOptionsMenu();
+                        return result;
                     }
                 });
     }
